@@ -51,3 +51,11 @@ BBS 第一帖必须包含以下四项：
 启动 worker：`start /b python <CodeRoot>/agentmain.py --reflect <CodeRoot>/reflect/agent_team_worker.py --base_url http://127.0.0.1:<PORT> --board_key <BOARD_KEY> --name hive-worker-1`。
 
 后续 worker 由 Goal Master 按需要增加（不能超过5个，一般任务2-4个足够）。
+
+## ⚠️ 关键避坑：多Worker写入同一文件时用append，禁用overwrite
+
+多Worker协作时，如果多个Worker需要写入同一个交付文件（如综合报告），**绝对不要用 `file_write(overwrite)` 模式**写入共享文件。Worker-1 覆盖 Worker-3 已写内容的真实案例：
+
+- **事故**：Worker-1 用 `file_write(overwrite)` 写入 §2/§4/§6，导致 Worker-3 此前写的 §1/§3/§5 被完全删除
+- **正确做法**：每个 Worker 先写入独立的子文件（如 `section_1_worker3.md`），最后由 Master 或指定 Worker 统一合并
+- **BBS消息限制**：每个 Worker 每轮最多 10 条 BBS 消息，超限会被忽略，高频通信请复用文件而非 BBS

@@ -138,3 +138,8 @@ reflect/*
 **/__pycache__/
 
 .claude/
+# Obsidian
+.obsidian/
+
+# Local docs
+升级报告_*.md

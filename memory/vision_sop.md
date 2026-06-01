@@ -8,7 +8,19 @@
    - **像素点击**（点按钮/链接/输入框）→ 用 `ocr_utils.py` 或 `ui_detect.py`（box精确到px）
    - **语义理解**（判断页面状态/描述内容）→ 用 Vision 模型
    - **🚫 禁止**：用 Vision 模型的 bbox 坐标做点击操作（bbox 偏差 10-20px，点不准）
+   - **坐标转换**：`ui_detect`/`ocr_utils` 返回的 bbox 是**截图内相对坐标(物理像素)**，转屏幕物理坐标需配合 `ljqCtrl`（见 `ljqCtrl_sop.md` 第3节）
 4. **能不用 vision 就不用**：如果窗口标题/本地 OCR（`ocr_utils.py`）能获取所需信息，就不要调用 vision API，省 token 且更可靠。Vision 是最后手段。
+5. **⚠️ 坐标体系说明（物理坐标 vs 绝对坐标 vs 相对坐标）**：
+   - **截图内相对坐标**：`ui_detect`/`ocr_utils` 返回的 bbox 坐标，相对于截图（客户区）左上角，单位是物理像素
+   - **屏幕绝对坐标（物理坐标）**：相对屏幕原点的实际像素位置，`ljqCtrl.Click()` 接收此坐标
+   - **屏幕逻辑坐标**：Windows API（如 `GetWindowRect`/`ClientToScreen`）返回的 DPI 缩放坐标
+   - **换算关系**：
+     ```
+     屏幕物理坐标(绝对) = 客户区原点物理坐标 + 截图内相对坐标(bbox)
+     客户区原点物理坐标 = ClientToScreen(hwnd, (0,0)) / ljqCtrl.dpi_scale   # 逻辑→物理
+     物理坐标 = 逻辑坐标 / ljqCtrl.dpi_scale
+     ```
+   - **🚫 禁止**：直接将 `GetWindowRect` 左上角 + bbox 当点击坐标（含标题栏+逻辑坐标未换算）。详见 `ljqCtrl_sop.md` 第2-3节
 
 ## 快速用法
 
