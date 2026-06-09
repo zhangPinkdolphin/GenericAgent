@@ -29,7 +29,7 @@ class Session:
         self.connect_at = time.time()
         self.disconnect_at = None
     def mark_disconnected(self):
-        if self.is_active(): print(f"Tab disconnected: {self.url} (Session: {self.id})")
+        if self.disconnect_at is None: print(f"Tab disconnected: {self.url} (Session: {self.id})")
         self.disconnect_at = time.time()
 
 
@@ -245,7 +245,7 @@ class TMWebDriver:
     def _remote_cmd(self, cmd):
         try: return requests.post(self.remote, headers={"Content-Type": "application/json"}, json=cmd, timeout=30).json()
         except (ConnectionError, requests.exceptions.ConnectionError):
-            raise ConnectionError("TMWebDriver master未运行，看tmwebdriver_sop启动master")
+            raise ConnectionError("TMWebDriver master未运行，看tmwebdriver_sop后台启动一个TMWebDriver")
 
     def get_all_sessions(self):  
         if self.is_remote:
